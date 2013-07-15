@@ -1,5 +1,5 @@
 ---
-- hosts: mgt2
+- hosts: mgt2.apu.edu
   user: jlg
   sudo: yes
   tasks:
