@@ -1,0 +1,23 @@
+---
+- hosts: all
+  vars:
+  remote_user:
+  tasks:
+  - name: Update the system
+    command: /bin/yum -y update
+  - name: Install software I want
+    yum: pkg={{ item }} state=latest
+    with_items:
+      - net-tools
+      - vim-enhanced
+      - tmux
+      - git
+      - ansible
+    # Need to figure out how to install VMware tools
+  - name: Checkout my dotfiles repo
+    git: repo=https://github.com/rothgar/dotfiles.git
+      dest=/home/rothgar/.dotfiles
+  - name: Disable root ssh login
+  - name: setup greyhole.conf
+  - name: setup smb.conf
+  - name: setup sudoers
