@@ -1,0 +1,5 @@
+---
+# file: amahi.yml
+- hosts: amahi
+  roles:
+    - common
