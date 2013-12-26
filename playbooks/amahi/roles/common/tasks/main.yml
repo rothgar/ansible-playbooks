@@ -1,23 +1,77 @@
 ---
-- hosts: all
-  vars:
-  remote_user:
-  tasks:
-  - name: Update the system
-    command: /bin/yum -y update
-  - name: Install software I want
-    yum: pkg={{ item }} state=latest
-    with_items:
-      - net-tools
-      - vim-enhanced
-      - tmux
-      - git
-      - ansible
-    # Need to figure out how to install VMware tools
-  - name: Checkout my dotfiles repo
-    git: repo=https://github.com/rothgar/dotfiles.git
-      dest=/home/rothgar/.dotfiles
-  - name: Disable root ssh login
-  - name: setup greyhole.conf
-  - name: setup smb.conf
-  - name: setup sudoers
+
+- name: Install misc software I want
+  yum: pkg={{ item }} state=latest
+  with_items:
+    - net-tools
+    - vim-enhanced
+    - tmux
+    - git
+    - iotop
+
+- name: Checkout my dotfiles repo
+  git: repo=https://github.com/rothgar/dotfiles.git dest=/home/rothgar/.dotfiles
+
+- name: Configure dotfiles
+  command: /home/rothgar/.dotfiles/bootstrap.sh
+  ignore_errors: True
+
+- name: Make mount folder
+  file: path=/mnt/cdrom state=directory owner=root group=root
+
+- name: Install VMware Tools (make sure VMware Tools iso is mounted)
+  mount: name=/mnt/cdrom src=/dev/cdrom fstype=iso9660 opts=ro state=present
+  register: result
+  until: result.stdout.find('VMware') != -1
+  retries: 10
+  delay: 10
+  when: ansible_virtualization_type == "VMware"
+
+- name: Extract installer
+  command: /usr/bin/tar -xzf /mnt/cdrom/VMwareTools*.tar.gz -C /tmp/
+  when: ansible_virtualization_type == "VMware" and result.stout.find("VMware Tools") != -1
+
+- name: Run VMware installer
+  command: /tmp/vmware-tools-distrib/vmware-install.pl -d
+  when: ansible_virtualization_type == "VMware"
+
+- name: Install greyhole
+  yum: pkg=hda-greyhole state=latest
+  tags: greyhole
+
+# NEED TO CLEAN THIS UP LATER TO BE IDEMPOTENT
+- name: Create greyhole DB
+  command: /bin/hda-create-db-and-user greyhole
+  tags: greyhole
+
+- name: greyhole DB schema
+  command: mysql -u greyhole -pgreyhole  greyhole < /usr/share/greyhole/schema-mysql.sql
+  tags: greyhole
+
+- name: modify greyhole.conf user
+  lineinfile: dest=/etc/greyhole.conf
+              regex='^[\t]db_user = '
+              line='^[\t]db_user = greyhole'
+  tags: greyhole
+
+- name: modify greyhole.conf password
+  lineinfile: dest=/etc/greyhole.conf
+              regex='^[\t]db_pass = '
+              line='^[\t]db_pass = greyhole'
+  tags: greyhole
+
+- name: Install software for disk mounting
+  yum: pkg={{ Item }} state=current
+  with_items:
+    - pmount
+    - fuse
+    - fuse-libs
+    - ntfs-3g
+    - gparted
+    - util-linux-ng
+    - cifs-utils
+  tags: diskmount
+
+- name: setup postfix
+  include: postfix.yml
+  tags: postfix

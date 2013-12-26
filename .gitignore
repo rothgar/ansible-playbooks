@@ -1,0 +1,9 @@
+# Personal hosts file
+hosts
+*/hosts
+
+# Sublime text files
+*.sublime-*
+
+# Files that may or may not contain sensitive information
+playbooks/amahi/roles/common/files/sasl_postfix

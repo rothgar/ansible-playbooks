@@ -1,0 +1,30 @@
+---
+# file: postfix.yml
+
+- name: Remove sendmail
+  yum: pkg={{ item }} state=absent
+  with_items:
+    - sendmail
+
+- name: Install Postfix
+  yum: pkg={{ item }} state=latest
+  with_items:
+    - postfix
+    - mailx
+
+#- name: Postfix template
+#  template: src=main.cf.j2 dest=/etc/postfix/main.cf
+
+- copy: src=sasl_passwd dest=/etc/postfix/sasl_passwd owner=root group=root mode=0600
+- copy: src=tls_policy dest=/etc/postfix/tls_policy owner=root group=root mode=0600
+
+# Compile the postfix dbs
+- command: postmap hash:/etc/postfix/sasl_passwd
+- command: postmap hash:/etc/postfix/tls_policy
+
+# Protect password sensitive files
+- file: path=/etc/postfix/sasl_postfix.db owner=root group=root mode=0600
+- file: path=/etc/postfix/tls_policy.db owner=root group=root mode=0600
+
+- name: restart and enable postfix
+  service: name=postfix state=restarted enabled=yes
