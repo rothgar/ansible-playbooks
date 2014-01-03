@@ -1,5 +1,7 @@
 ---
 # file: amahi.yml
 - hosts: amahi
+  vars_files:
+    - vars.yml
   roles:
     - common

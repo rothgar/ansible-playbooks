@@ -6,14 +6,11 @@ This playbook will attempt to get an [Amahi](http://amahi.org) 7.1 headless inst
 Not all of the setup works yet, and some of it will go away with Amahi 7.2. But I wanted to make my test installs repeatable.
 
 ## ToDo ##
-[ ] Finish VMware tools installation
-
-[ ] Finish postfix setup for Gmail SMTP
-
-[ ] Configure greyhole instead of just installing it
-
-[ ] Create users
-
-[ ] Create shares
-
-[ ] Install available apps
+ - [ ] Finish VMware tools installation
+ - [ ] Finish postfix setup for Gmail SMTP
+ - [ ] Configure greyhole instead of just installing it
+ - [ ] Create users
+ - [ ] Create shares
+ - [ ] Install available apps
+ - [x] Create vars.yml
+ - [x] Create handlers.yml

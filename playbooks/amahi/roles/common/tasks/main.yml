@@ -1,18 +1,17 @@
 ---
+# need to find a way to do this with Amahi specific tools hda-create-db-and-user
+- name: Create user
+  user: name=${hda_user} state=present
+
 - name: Install misc software I want
   yum: pkg={{ item }} state=latest
-  with_items:
-    - net-tools
-    - vim-enhanced
-    - tmux
-    - git
-    - iotop
+  with_items: ${optional_packages}
 
 - name: Checkout my dotfiles repo
-  git: repo=https://github.com/rothgar/dotfiles.git dest=/home/rothgar/.dotfiles
+  git: repo=${dotfiles_repo}
 
 - name: Configure dotfiles
-  command: /home/rothgar/.dotfiles/bootstrap.sh
+  command: ${dotfiles_bootstap}
   ignore_errors: True
 
 - name: Make mount folder
@@ -35,7 +34,8 @@
   when: ansible_virtualization_type == "VMware"
 
 - name: Install greyhole
-  yum: pkg=hda-greyhole state=latest
+  yum: pkg={{ item }} state=latest
+  with_items: ${greyhole_packages}
   tags: greyhole
 
 # NEED TO CLEAN THIS UP LATER TO BE IDEMPOTENT
@@ -58,18 +58,6 @@
               regex='^[\t]db_pass = '
               line='^[\t]db_pass = greyhole'
   tags: greyhole
-
-- name: Install software for disk mounting
-  yum: pkg={{ Item }} state=current
-  with_items:
-    - pmount
-    - fuse
-    - fuse-libs
-    - ntfs-3g
-    - gparted
-    - util-linux-ng
-    - cifs-utils
-  tags: diskmount
 
 - name: setup postfix
   include: postfix.yml

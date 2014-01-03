@@ -1,0 +1,19 @@
+---
+hda_user: rothgar
+dotfiles_repo: repo=https://github.com/${user}/dotfiles.git dest=/home/${user}/.dotfiles
+dotfiles_bootstrap: /home/${user}/.dotfiles/bootstrap.sh
+optional_packages:
+  - net-tools
+  - vim-enhanced
+  - tmux
+  - git
+  - iotop
+greyhole_packages:
+  - greyhole
+  - pmount
+  - fuse
+  - fuse-libs
+  - ntfs-3g
+  - gparted
+  - util-linux-ng
+  - cifs-utils
